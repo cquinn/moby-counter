@@ -6,9 +6,10 @@ var redis = require('redis')
 module.exports = function(opts){
 
   console.log('using redis server')
+  console.log('env: ' + JSON.stringify(process.env))
 
   var port = opts.redis_port || process.env.USE_REDIS_PORT || 6379
-  var host = opts.redis_host || process.env.USE_REDIS_HOST || 'redis'
+  var host = opts.redis_host || process.env.USE_REDIS_HOST || process.env.RC_PHYSICAL_HOSTNAME || 'redis'
 
   var connectionStatus = false
 
@@ -45,7 +46,7 @@ module.exports = function(opts){
 
   router.addRoute("/v1/whales", {
     GET: function (req, res) {
-      
+
       client.lrange('whales', 0, -1, function(err, data){
         res.setHeader('Content-type', 'application/json')
         res.end(JSON.stringify(data))
@@ -57,10 +58,10 @@ module.exports = function(opts){
 
         client.rpush('whales', data, function(){
           client.save(function(){
-            res.end('ok')  
+            res.end('ok')
           })
         })
-        
+
       }))
     }
   })
